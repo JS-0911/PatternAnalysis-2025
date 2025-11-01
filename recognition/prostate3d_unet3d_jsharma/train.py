@@ -22,7 +22,7 @@ from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 
-from .modules import ImprovedUNet3D
+from modules import Improved3DUNet
 from .dataset import (
     Prostate3DDataset, Resize3D, Normalize3D, RandomFlip3D, RandomRotate3D
 )
