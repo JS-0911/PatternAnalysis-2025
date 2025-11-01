@@ -1,0 +1,22 @@
+# virtual environments
+.venv/
+venv/
+
+# python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+
+# datasets / models (spec: do not commit)
+fake_data/
+*.nii
+*.nii.gz
+checkpoints/
+runs/
+outputs/
+
+# OS + IDE junk
+.DS_Store
+.vscode/
