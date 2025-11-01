@@ -1,65 +1,86 @@
-# predict.py
-# Author: Janvhi Sharma (COMP3710 Project 7)
-# Inference and evaluation script for 3D UNet segmentation
+# Commit milestone: integrated evaluation loop and Dice metric computation for final testing phase
+"""
+predict.py — Load a trained checkpoint and report Dice on a held-out set.
+Also demonstrates saving a few predicted masks as NIfTI for the README.
 
-import os
-import torch
-import nibabel as nib
+Usage example (Rangpur/Colab):
+  python -m recognition.prostate3d_unet3d_jsharma.predict \
+    --images_dir /home/groups/comp3710/HipMRI_Study_open/semantic_MRs \
+    --labels_dir /home/groups/comp3710/HipMRI_Study_open/semantic_labels_only \
+    --ckpt recognition/prostate3d_unet3d_jsharma/outputs/checkpoints/best.pt
+"""
+
+from __future__ import annotations
+import argparse
+from pathlib import Path
 import numpy as np
+import nibabel as nib
+
+import torch
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from dataset import Prostate3DDataset
-from modules import UNet3D, DiceLoss
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-ROOT_DIR = "/home/groups/comp3710/PROSTATE_3D"
-CKPT_PATH = "best_model.ckpt"
-OUT_DIR = "predictions"
-os.makedirs(OUT_DIR, exist_ok=True)
+from .modules import ImprovedUNet3D
+from .dataset import Prostate3DDataset, Resize3D, Normalize3D
 
 
-def dice_score(preds, targets):
-    preds = torch.argmax(preds, dim=1)
-    targets = torch.argmax(targets, dim=1)
-    intersection = (preds * targets).float().sum()
-    return (2. * intersection) / (preds.sum() + targets.sum() + 1e-8)
-
-
-def save_slice(volume, path):
-    """Save a middle axial slice as PNG for visualization."""
-    import matplotlib.pyplot as plt
-    mid = volume.shape[1] // 2
-    plt.imshow(volume[0, mid, :, :], cmap='gray')
-    plt.axis('off')
-    plt.savefig(path, bbox_inches='tight', pad_inches=0)
-    plt.close()
+@torch.no_grad()
+def per_class_dice(logits: torch.Tensor, target_oh: torch.Tensor, eps: float = 1e-6):
+    probs = F.softmax(logits, dim=1)
+    probs = probs.flatten(2)            # (N,C,V)
+    target = target_oh.flatten(2)
+    inter = (probs * target).sum(dim=(0, 2))
+    denom = probs.sum(dim=(0, 2)) + target.sum(dim=(0, 2))
+    dice_c = (2 * inter + eps) / (denom + eps)
+    return dice_c  # (C,)
 
 
 def main():
-    print(f"Running inference on device: {DEVICE}")
-    model = UNet3D().to(DEVICE)
-    model.load_state_dict(torch.load(CKPT_PATH, map_location=DEVICE))
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--images_dir", type=str, required=True)
+    ap.add_argument("--labels_dir", type=str, required=True)
+    ap.add_argument("--num_classes", type=int, default=6)
+    ap.add_argument("--ckpt", type=str, required=True)
+    ap.add_argument("--out", type=str, default="recognition/prostate3d_unet3d_jsharma/outputs/predicts")
+    ap.add_argument("--n_save", type=int, default=3, help="how many volumes to save as NIfTI")
+    args = ap.parse_args()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # deterministic val/test pipeline
+    ds = Prostate3DDataset(
+        args.images_dir, args.labels_dir, num_classes=args.num_classes,
+        transform=[Resize3D((96, 128, 128)), Normalize3D()]
+    )
+    loader = DataLoader(ds, batch_size=1, shuffle=False, num_workers=2, pin_memory=True)
+
+    model = ImprovedUNet3D(in_channels=1, num_classes=args.num_classes).to(device)
+    model.load_state_dict(torch.load(args.ckpt, map_location=device))
     model.eval()
 
-    test_ds = Prostate3DDataset(ROOT_DIR, split="test")
-    test_loader = DataLoader(test_ds, batch_size=1)
+    dice_sum = torch.zeros(args.num_classes, device=device)
+    count = 0
 
-    dice_total = 0
-    for idx, (x, y) in enumerate(test_loader):
-        x, y = x.to(DEVICE), y.to(DEVICE)
-        with torch.no_grad():
-            preds = model(x)
-        dice = dice_score(preds, y)
-        dice_total += dice.item()
+    out_dir = Path(args.out); out_dir.mkdir(parents=True, exist_ok=True)
 
-        # save example slice
-        pred_np = torch.argmax(preds, dim=1).cpu().numpy()[0]
-        save_slice(pred_np[np.newaxis, ...],
-                   os.path.join(OUT_DIR, f"sample_{idx}.png"))
+    for i, (img, lbl_oh) in enumerate(loader):
+        img = img.to(device); lbl_oh = lbl_oh.to(device)
+        logits = model(img)
 
-        print(f"Sample {idx} → Dice: {dice:.4f}")
+        dice_c = per_class_dice(logits, lbl_oh)
+        dice_sum += dice_c
+        count += 1
 
-    mean_dice = dice_total / len(test_loader)
-    print(f"\n Average Dice on test set: {mean_dice:.4f}")
+        # save a few predictions as NIfTI for the README
+        if i < args.n_save:
+            pred = torch.argmax(logits, dim=1)[0].cpu().numpy().astype(np.uint8)  # (D,H,W)
+            # save with an identity affine (no physical coords needed for report)
+            nif = nib.Nifti1Image(pred, affine=np.eye(4))
+            nib.save(nif, out_dir / f"pred_{i:03d}.nii.gz")
+
+    mean_per_class = (dice_sum / count).cpu().numpy()
+    print("Per-class Dice:", np.round(mean_per_class, 4).tolist())
+    print("Mean Dice:", float(np.mean(mean_per_class)))
 
 
 if __name__ == "__main__":
