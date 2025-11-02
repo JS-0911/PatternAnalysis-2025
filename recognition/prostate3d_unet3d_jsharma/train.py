@@ -1,15 +1,12 @@
+from __future__ import annotations
+import sys, os
+#  Add the parent directory to sys.path for SLURM compatibility
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 # Commit milestone: refined training and validation loops, added Dice loss monitoring and seed reproducibility
 """
 train.py — Train/validate/save the 3D model, log metrics & plots.
-
-Spec alignment:
-- imports model from modules.py and dataset/augmentations from dataset.py
-- logs loss + Dice, saves best checkpoint, saves training curves
-- provides CLI args so Rangpur/Colab paths are easy to pass
 """
-
-from __future__ import annotations
-import os
 import argparse
 import random
 from pathlib import Path
@@ -18,12 +15,13 @@ from typing import Tuple, Dict
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
 import torch.nn.functional as F
+from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
-from modules import Improved3DUNet
-from .dataset import (
+#  Updated imports
+from modules import ImprovedUNet3D
+from dataset import (
     Prostate3DDataset, Resize3D, Normalize3D, RandomFlip3D, RandomRotate3D
 )
 

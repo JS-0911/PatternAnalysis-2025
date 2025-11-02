@@ -178,6 +178,7 @@ class Prostate3DDataset(Dataset):
         adapt here. By default, uses same basename + label_suffix.
         """
         base = img_name.replace(".nii.gz", "").replace(".nii", "")
+        base = base.replace("LFOV", "SEMANTIC")
         if self.label_suffix:
             base = f"{base}{self.label_suffix}"
         # assume .nii.gz if exists, else .nii

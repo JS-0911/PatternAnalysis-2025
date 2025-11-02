@@ -1,3 +1,6 @@
+from __future__ import annotations
+import sys, os
+sys.path.append(os.path.dirname(__file__))
 # Commit milestone: integrated evaluation loop and Dice metric computation for final testing phase
 """
 predict.py — Load a trained checkpoint and report Dice on a held-out set.
@@ -10,7 +13,6 @@ Usage example (Rangpur/Colab):
     --ckpt recognition/prostate3d_unet3d_jsharma/outputs/checkpoints/best.pt
 """
 
-from __future__ import annotations
 import argparse
 from pathlib import Path
 import numpy as np
@@ -20,7 +22,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from .modules import ImprovedUNet3D
+from modules import ImprovedUNet3D as Improved3DUNet
 from .dataset import Prostate3DDataset, Resize3D, Normalize3D
 
 
