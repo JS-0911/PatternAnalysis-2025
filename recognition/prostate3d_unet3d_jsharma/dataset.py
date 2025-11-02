@@ -129,7 +129,7 @@ class RandomRotate3D:
         if img.ndim == 3:
             img = img[None, ...]
         # rotate around (D,H), (H,W), (D,W)
-        for axes in [(1, 2), (2, 3), (1, 3)]:
+        for axes in [(0, 1), (1, 2), (0, 2)]:
             ang = random.uniform(-self.max_deg, self.max_deg)
             # image: order=1, label: nearest (0)
             for c in range(img.shape[0]):
