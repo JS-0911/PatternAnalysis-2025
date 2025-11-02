@@ -1,6 +1,0 @@
-=== SLURM NODE: a100-0 ===
-=== START: Sun Nov  2 00:45:51 AEST 2025 ===
-CUDA visible: 0
-Torch CUDA available: True
-python: can't open file '/home/Student/s4975045/comp3710/PatternAnalysis-2025/test_driver.py': [Errno 2] No such file or directory
-=== END: Sun Nov  2 00:45:58 AEST 2025 ===

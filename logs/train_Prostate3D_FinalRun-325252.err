@@ -1,0 +1,38 @@
+/var/slurm/d/job325252/slurm_script: line 18: /home/Student/s4975045/miniconda3/etc/profile.d/conda.sh: No such file or directory
+Traceback (most recent call last):
+  File "/home/Student/s4975045/comp3710/PatternAnalysis-2025/recognition/prostate3d_unet3d_jsharma/train.py", line 246, in <module>
+    main()
+  File "/home/Student/s4975045/comp3710/PatternAnalysis-2025/recognition/prostate3d_unet3d_jsharma/train.py", line 225, in main
+    tr_loss, tr_dice = train_one_epoch(model, train_loader, optimizer, criterion, device)
+  File "/home/Student/s4975045/comp3710/PatternAnalysis-2025/recognition/prostate3d_unet3d_jsharma/train.py", line 73, in train_one_epoch
+    for imgs, lbls in loader:
+  File "/home/Student/s4975045/miniconda/envs/pa2025/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 733, in __next__
+    data = self._next_data()
+  File "/home/Student/s4975045/miniconda/envs/pa2025/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1515, in _next_data
+    return self._process_data(data, worker_id)
+  File "/home/Student/s4975045/miniconda/envs/pa2025/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1550, in _process_data
+    data.reraise()
+  File "/home/Student/s4975045/miniconda/envs/pa2025/lib/python3.10/site-packages/torch/_utils.py", line 750, in reraise
+    raise exception
+ValueError: Caught ValueError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "/home/Student/s4975045/miniconda/envs/pa2025/lib/python3.10/site-packages/torch/utils/data/_utils/worker.py", line 349, in _worker_loop
+    data = fetcher.fetch(index)  # type: ignore[possibly-undefined]
+  File "/home/Student/s4975045/miniconda/envs/pa2025/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 50, in fetch
+    data = self.dataset.__getitems__(possibly_batched_index)
+  File "/home/Student/s4975045/miniconda/envs/pa2025/lib/python3.10/site-packages/torch/utils/data/dataset.py", line 416, in __getitems__
+    return [self.dataset[self.indices[idx]] for idx in indices]
+  File "/home/Student/s4975045/miniconda/envs/pa2025/lib/python3.10/site-packages/torch/utils/data/dataset.py", line 416, in <listcomp>
+    return [self.dataset[self.indices[idx]] for idx in indices]
+  File "/home/Student/s4975045/comp3710/PatternAnalysis-2025/recognition/prostate3d_unet3d_jsharma/dataset.py", line 207, in __getitem__
+    sample = t(sample)
+  File "/home/Student/s4975045/comp3710/PatternAnalysis-2025/recognition/prostate3d_unet3d_jsharma/dataset.py", line 136, in __call__
+    img[c] = rotate(img[c], ang, axes=axes, reshape=False, order=1, mode="nearest")
+  File "/home/Student/s4975045/miniconda/envs/pa2025/lib/python3.10/site-packages/scipy/ndimage/_interpolation.py", line 952, in rotate
+    raise ValueError('invalid rotation plane specified')
+ValueError: invalid rotation plane specified
+
+Traceback (most recent call last):
+  File "/home/Student/s4975045/comp3710/PatternAnalysis-2025/recognition/prostate3d_unet3d_jsharma/predict.py", line 26, in <module>
+    from .dataset import Prostate3DDataset, Resize3D, Normalize3D
+ImportError: attempted relative import with no known parent package
