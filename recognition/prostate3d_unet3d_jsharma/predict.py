@@ -23,8 +23,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from modules import ImprovedUNet3D as Improved3DUNet
-from .dataset import Prostate3DDataset, Resize3D, Normalize3D
-
+from dataset import Prostate3DDataset, Resize3D, Normalize3D
 
 @torch.no_grad()
 def per_class_dice(logits: torch.Tensor, target_oh: torch.Tensor, eps: float = 1e-6):
@@ -56,7 +55,7 @@ def main():
     )
     loader = DataLoader(ds, batch_size=1, shuffle=False, num_workers=2, pin_memory=True)
 
-    model = ImprovedUNet3D(in_channels=1, num_classes=args.num_classes).to(device)
+    model = Improved3DUNet(in_channels=1, num_classes=args.num_classes).to(device)
     model.load_state_dict(torch.load(args.ckpt, map_location=device))
     model.eval()
 
