@@ -1,9 +1,0 @@
-/var/slurm/d/job325196/slurm_script: line 16: /home/Student/s4975045/miniconda3/etc/profile.d/conda.sh: No such file or directory
-
-EnvironmentNameNotFound: Could not find conda environment: unet
-You can list all discoverable environments with `conda info --envs`.
-
-
-/var/slurm/d/job325196/slurm_script: line 22: cd: /home/Student/s4975045/PatternAnalysis-2025/recognition/Prostate3D_ImprovedUNet_Abhya: No such file or directory
-python: can't open file '/home/Student/s4975045/comp3710/PatternAnalysis-2025/train.py': [Errno 2] No such file or directory
-python: can't open file '/home/Student/s4975045/comp3710/PatternAnalysis-2025/predict.py': [Errno 2] No such file or directory
