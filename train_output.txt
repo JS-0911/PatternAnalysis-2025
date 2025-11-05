@@ -1,0 +1,5 @@
+>>> Training started
+[Epoch 001] loss 0.5890/0.5165 dice 0.4102/0.4835
+[Epoch 005] loss 0.3045/0.6481 dice 0.5997/0.6522
+[Epoch 010] loss 0.2159/0.2024 dice 0.7841/0.7976
+>>> Training complete. Best val dice: 0.7976
